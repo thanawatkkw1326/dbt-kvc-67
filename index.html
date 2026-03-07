@@ -10,11 +10,14 @@
 <body>
 
 <header class="topbar">
+  <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+
   <button class="logo-btn" id="logo-btn" onclick="document.getElementById('logo-input').click()">
-    </button>
+  </button>
   <input type="file" id="logo-input" accept="image/*" style="display:none" onchange="handleLogoUpload(event)">
   <div>
-    <div class="brand-name">ระบบชำระค่าเทอม สาขาวิชา เทคโนโลยีธุรกิจดิจิทัล</div>
+    <div class="brand-name">ระบบชำระค่าเทอม</div> 
+    <div class="brand-name">สาขาวิชา เทคโนโลยีธุรกิจดิจิทัล</div>
     <div class="brand-sub">วิทยาลัยอาชีวศึกษาขอนแก่น </div>
   </div>
 </header>
@@ -22,6 +25,7 @@
 <div class="layout">
 
   <!-- SIDEBAR -->
+   
   <nav class="sidebar">
     <div class="sidebar-label">เมนู</div>
     <div class="sidebar-item active" id="nav-home" onclick="showPage('home')">
