@@ -262,6 +262,12 @@ function submitPayment() {
   const pre = document.getElementById('pf-prefix').value;
   const yr  = document.getElementById('pf-year').value;
   const late = withLate ? LATE : 0;
+  const btnSlip = document.querySelector('button[onclick*="slip-upload"]');
+  if (btnSlip) {
+      btnSlip.innerHTML = `📁 แนบหลักฐาน`; // คืนค่าข้อความเดิม
+      btnSlip.style.color = '';            // คืนค่าสีเดิม
+  }
+  // ---------------------------------------
 
   payments[s.id] = {
     fullname: fn, prefix: pre,
@@ -317,3 +323,16 @@ loadLogo();
 // loadPhotos();
 renderGrid();
 renderSummary();
+
+// ฟังก์ชันสำหรับสลับการ เปิด/ปิด เมนู
+function toggleMenu() {
+    const sidebar = document.querySelector('.sidebar');
+    sidebar.classList.toggle('active');
+}
+
+// เมื่อคลิกที่รายการเมนู (หน้าแรก หรือ จำนวนการชำระ) ให้เมนูหุบกลับอัตโนมัติ
+document.querySelectorAll('.sidebar-item').forEach(item => {
+    item.addEventListener('click', () => {
+        document.querySelector('.sidebar').classList.remove('active');
+    });
+});
