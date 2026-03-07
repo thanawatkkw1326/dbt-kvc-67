@@ -663,3 +663,66 @@ body {
 /* topbar logo spin on hover */
 .logo-btn { transition: transform 0.3s ease; }
 .logo-btn:hover { transform: rotate(8deg) scale(1.08); }
+
+/* ══ MOBILE OPTIMIZATION ══ */
+@media (max-width: 768px) {
+  /* ปรับ Topbar ให้เล็กลงแต่ยังอ่านง่าย */
+  .topbar {
+    height: 80px;
+    padding: 0 15px;
+    gap: 15px;
+  }
+
+  .brand-name {
+    font-size: 18px; /* ลดขนาดตัวอักษรชื่อระบบ */
+  }
+
+  .brand-sub {
+    font-size: 12px;
+  }
+
+  .logo-btn {
+    width: 60px;
+    height: 60px;
+  }
+
+  /* ปรับ Layout ให้ Sidebar หลบไป หรือซ่อนไว้ก่อน */
+  .layout {
+    flex-direction: column; /* เรียงจากบนลงล่าง */
+  }
+
+  .sidebar {
+    width: 100%;
+    flex-direction: row; /* ให้เมนูเรียงกันแนวนอน */
+    overflow-x: auto;   /* เลื่อนซ้ายขวาได้ถ้าเมนูเยอะ */
+    padding: 10px;
+    border-right: none;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .sidebar-item {
+    white-space: nowrap; /* ไม่ให้ตัวหนังสือตัดบรรทัด */
+    font-size: 12px;
+  }
+
+  /* ปรับ Grid นักศึกษาให้โชว์แค่ 1 หรือ 2 คอลัมน์ */
+  .main {
+    padding: 20px 15px;
+  }
+
+  .student-grid {
+    grid-template-columns: repeat(2, 1fr); /* แสดง 2 คอลัมน์ในมือถือ */
+    gap: 10px;
+  }
+
+  /* ปรับขนาด Modal (หน้าต่างป๊อปอัพ) ให้เต็มจอขึ้น */
+  .modal {
+    width: 95%;
+    padding: 25px 20px;
+  }
+
+  /* ปรับตารางในหน้าสรุปให้เลื่อนซ้ายขวาได้ */
+  .tbl-wrap {
+    overflow-x: auto;
+  }
+}
