@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบชำระค่าเทอม · DBT</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <button class="logo-btn" id="logo-btn" onclick="document.getElementById('logo-input').click()">
+    </button>
+  <input type="file" id="logo-input" accept="image/*" style="display:none" onchange="handleLogoUpload(event)">
+  <div>
+    <div class="brand-name">ระบบชำระค่าเทอม สาขาวิชา เทคโนโลยีธุรกิจดิจิทัล</div>
+    <div class="brand-sub">วิทยาลัยอาชีวศึกษาขอนแก่น </div>
+  </div>
+</header>
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-label">เมนู</div>
+    <div class="sidebar-item active" id="nav-home" onclick="showPage('home')">
+      <span>🏠</span> หน้าแรก
+    </div>
+    <div class="sidebar-item" id="nav-summary" onclick="showPage('summary')">
+      <span>📊</span> จำนวนการชำระ
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- HOME PAGE -->
+    <div class="page active" id="page-home">
+      <h2 style="font-family:'Playfair Display',serif; margin-bottom:24px;">รายชื่อนักศึกษา</h2>
+      <div class="student-grid" id="student-grid"></div>
+    </div>
+
+<!-- FORM PAGE -->
+<div class="page" id="page-form">
+
+  <div class="pf-hero">
+    <div class="pf-avatar-wrap" id="pf-avatar-wrap"
+      onclick="document.getElementById('photo-input').click()">
+      <div class="pf-avatar-inner" id="pf-avatar-inner">
+        <svg viewBox="0 0 80 80" fill="white" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="40" cy="30" r="18"/>
+          <ellipse cx="40" cy="65" rx="28" ry="18"/>
+        </svg>
+        <div class="pf-avatar-ov">
+          <div style="font-size:22px">📷</div>
+          <div>อัปโหลดรูป</div>
+        </div>
+      </div>
+    </div>
+    <input type="file" id="photo-input" accept="image/*"
+      onchange="handlePhotoUpload(event)" style="display:none">
+    <div class="pf-hero-name" id="pf-name">—</div>
+    <div class="pf-hero-id" id="pf-id">รหัสนักศึกษา —</div>
+  </div>
+
+  <div class="f-grid">
+    <div>
+      <label class="f-label">คำนำหน้า</label>
+      <select class="f-select" id="pf-prefix">
+        <option>นาย</option>
+        <option>นางสาว</option>
+        <option>นาง</option>
+        <option>ว่าที่ร้อยตรี</option>
+      </select>
+    </div>
+    <div>
+      <label class="f-label">ชื่อ – นามสกุล</label>
+      <input type="text" class="f-input" id="pf-fullname" placeholder="ชื่อ-นามสกุล">
+    </div>
+    <div>
+      <label class="f-label">รหัสนักศึกษา</label>
+      <input type="text" class="f-input" id="pf-student-id" readonly
+        style="background:var(--navy-lt);color:var(--navy);font-weight:700;">
+    </div>
+    <div>
+      <label class="f-label">ปีการศึกษา</label>
+      <select class="f-select" id="pf-year">
+        <option>2/2568</option>
+        <option>1/2568</option>
+        <option>2/2567</option>
+      </select>
+    </div>
+    <div>
+      <label class="f-label">วันที่ชำระ</label>
+      <input type="date" class="f-input" id="pf-date">
+    </div>
+    <div>
+      <label class="f-label">💰 ค่าเทอม</label>
+      <div class="amount-display">
+        <span>🔒</span>
+        <span class="amt-num">6,400</span>
+        <span class="amt-label">บาท</span>
+      </div>
+    </div>
+    <div class="f-span">
+      <label class="f-label">ค่าปรับชำระล่าช้า</label>
+      <div class="toggle-row">
+        <button class="toggle-btn off" id="btn-late-yes" onclick="setLateFee(true)">
+          ✅ จ่ายค่าปรับจชำระล่าช้า
+        </button>
+        <button class="toggle-btn on" id="btn-late-no" onclick="setLateFee(false)">
+          ❌ ไม่มีค่าปรับ
+        </button>
+        <div class="late-chip" id="late-chip">
+          ⚠️ ค่าปรับ <strong>+500 บาท</strong> ถูกเพิ่มแล้ว
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="total-card">
+    <div>
+      <div class="total-tag">ยอดรวมสุทธิ</div>
+      <div class="total-label" id="total-breakdown">ค่าเทอม 6,400 บาท</div>
+    </div>
+    <div style="text-align:right">
+      <span class="total-num" id="pf-total">6,400</span>
+      <span class="total-baht">บาท</span>
+    </div>
+  </div>
+
+<div class="actions-row">
+  <button type="button" class="btn-ghost" onclick="showPage('home')">← ย้อนกลับ</button>
+  
+  <button type="button" class="btn-ghost" onclick="document.getElementById('slip-upload').click()">
+    📁 แนบหลักฐาน
+  </button>
+  
+  <input type="file" id="slip-upload" style="display:none" accept="image/*" onchange="handleSlipUpload(event)">
+  
+  <button type="button" class="btn-primary-sm" onclick="submitPayment()">ส่งข้อมูล →</button>
+</div>
+
+</div>
+
+<!-- SUMMARY PAGE -->
+<div class="page" id="page-summary">
+
+  <div class="summary-head">
+    <div class="summary-title-text">
+      แบบสรุปการชำระค่าเทอม ปีการศึกษา 2/2568
+    </div>
+    <button class="btn-pdf" onclick="window.print()">🖨 ออก PDF</button>
+  </div>
+
+  <!-- Stats Row -->
+  <div class="stats-row">
+    <div class="stat-card s-total">
+      <div class="stat-label">นักศึกษาทั้งหมด</div>
+      <div class="stat-num" id="total-count">17</div>
+      <div class="stat-sub">คน · ปีการศึกษา 2/2568</div>
+    </div>
+    <div class="stat-card s-paid">
+      <div class="stat-label">ชำระแล้ว</div>
+      <div class="stat-num" id="paid-count">0</div>
+      <div class="stat-sub">คน · เสร็จสิ้น</div>
+    </div>
+    <div class="stat-card s-unpaid">
+      <div class="stat-label">ยังไม่ชำระ</div>
+      <div class="stat-num" id="unpaid-count">17</div>
+      <div class="stat-sub">คน · รอดำเนินการ</div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="tbl-wrap">
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th>ชื่อ–นามสกุล</th>
+          <th>รหัสนักศึกษา</th>
+          <th>ปีการศึกษา</th>
+          <th>ค่าเทอม</th>
+          <th>ค่าปรับล่าช้า</th>
+          <th>รวม</th>
+          <th>สถานะ</th>
+        </tr>
+      </thead>
+      <tbody id="summary-tbody"></tbody>
+    </table>
+  </div>
+
+</div>
+
+  </main>
+</div>
+
+<!-- LOGIN MODAL -->
+<div class="modal-overlay" id="login-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+
+    <div class="modal-avatar-ring">
+      <div class="modal-avatar-inner" id="modal-avatar-inner">
+        <svg viewBox="0 0 80 80" fill="white" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="40" cy="30" r="18"/>
+          <ellipse cx="40" cy="65" rx="28" ry="18"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="modal-title" id="modal-name">เข้าสู่ระบบ</div>
+    <div class="modal-subtitle" id="modal-hint">กรอกรหัสเพื่อเข้าชำระค่าเทอม</div>
+
+    <div class="f-group">
+      <label class="f-label">ชื่อผู้ใช้ (รหัสนักศึกษา)</label>
+      <input class="f-input" type="text" id="login-user"
+        placeholder="เช่น 67402040123" maxlength="11">
+    </div>
+    <div class="f-group">
+      <label class="f-label">รหัสผ่าน</label>
+      <input class="f-input" type="password" id="login-pass"
+        placeholder="DBT(เลข 3 ตัวด้านหลัง)"
+        onkeydown="if(event.key==='Enter') doLogin()">
+    </div>
+
+    <button class="btn-solid" onclick="doLogin()">เข้าสู่ระบบ</button>
+    <div class="err-msg" id="login-error">รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่</div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div class="toast-dot" id="toast-dot"></div>
+  <span id="toast-msg">บันทึกสำเร็จ</span>
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
