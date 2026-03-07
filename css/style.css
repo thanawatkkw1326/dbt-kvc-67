@@ -153,6 +153,8 @@ body {
   font-weight: 700;
 }
 
+
+
 /* ══ MAIN ══ */
 .main { flex:1; padding: 36px 40px; overflow-y: auto; }
 
@@ -725,4 +727,93 @@ body {
   .tbl-wrap {
     overflow-x: auto;
   }
+}
+
+/* ปุ่มกดเมนู (ซ่อนไว้เมื่อดูในคอมพิวเตอร์) */
+.menu-toggle {
+    display: none;
+    background: #ffb800; /* สีเหลืองทองให้เข้ากับโลโก้ */
+    border: none;
+    color: #001f3f;
+    font-size: 24px;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 15px;
+}
+
+/* ══ บังคับค่าพื้นฐานสำหรับเมนูพับ ══ */
+.menu-toggle {
+    display: none; /* ซ่อนในหน้าจอคอม */
+    background: #ffb800;
+    border: none;
+    color: #001f3f;
+    font-size: 22px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-right: 10px;
+    transition: transform 0.2s;
+}
+
+/* ══ MOBILE OPTIMIZATION (COMPLETED) ══ */
+@media (max-width: 768px) {
+    /* 1. แสดงปุ่มเปิดเมนู */
+    .menu-toggle {
+        display: block !important;
+        z-index: 1001;
+    }
+
+    /* 2. ปรับ Topbar */
+    .topbar {
+        height: 80px;
+        padding: 0 15px;
+        gap: 5px;
+        justify-content: flex-start;
+    }
+
+    .brand-container { gap: 0; }
+    .brand-title { display: none; } /* ซ่อนหัวข้อใหญ่เพื่อประหยัดที่ */
+    .brand-name { font-size: 16px !important; margin: 0; }
+    .brand-sub { font-size: 10px !important; }
+    .logo-btn { width: 45px; height: 45px; }
+
+    /* 3. จัดการ Sidebar ให้ "พับ" (Off-canvas) */
+    .sidebar {
+        position: fixed !important;
+        top: 80px; /* ต่อล่าง Topbar */
+        left: -280px; /* ดันออกไปนอกจอทางซ้าย */
+        width: 260px;
+        height: calc(100vh - 80px);
+        background: white !important;
+        z-index: 1000;
+        transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 5px 0 15px rgba(0,0,0,0.15);
+        display: flex !important;
+        flex-direction: column !important;
+        padding: 20px 15px !important;
+        border-right: 1px solid var(--line);
+    }
+
+    /* เมื่อกดปุ่มแล้ว Class 'active' จะทำงาน (ผ่าน JS) */
+    .sidebar.active {
+        left: 0 !important;
+    }
+
+    /* 4. ปรับ Layout และ Grid */
+    .layout { flex-direction: column; }
+    .main { padding: 20px 15px; }
+
+    .student-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px;
+    }
+
+    /* 5. ปรับ Modal ให้เต็มจอ */
+    .modal {
+        width: 95%;
+        padding: 25px 15px;
+    }
+    .f-grid { grid-template-columns: 1fr; }
+    .total-num { font-size: 30px; }
 }
