@@ -246,13 +246,33 @@ function renderSummary() {
   });
 }
 
-// ── UI NAVIGATION ──
+// ── UI NAVIGATION (ฉบับแก้ไข Error Null) ──
 function showPage(name) {
+  // 1. ลบ class active ออกจากทุกหน้าและทุกปุ่มเมนูก่อน
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.sidebar-item').forEach(b => b.classList.remove('active'));
-  document.getElementById('page-' + name).classList.add('active');
-  document.getElementById('nav-' + name).classList.add('active');
-  if(window.innerWidth < 768) toggleMenu();
+
+  // 2. แสดงหน้าที่ต้องการ
+  const targetPage = document.getElementById('page-' + name);
+  if (targetPage) {
+    targetPage.classList.add('active');
+  } else {
+    console.warn(`ไม่พบหน้า: page-${name}`);
+  }
+
+  // 3. ทำให้ปุ่มเมนูสว่างขึ้น (เฉพาะถ้ามีปุ่มนั้นอยู่ใน Sidebar)
+  const targetNav = document.getElementById('nav-' + name);
+  if (targetNav) {
+    targetNav.classList.add('active');
+  }
+
+  // 4. ปิดเมนูบนมือถืออัตโนมัติ
+  if (window.innerWidth < 768) {
+    const sidebar = document.querySelector('.sidebar');
+    if (sidebar && sidebar.classList.contains('active')) {
+      toggleMenu();
+    }
+  }
 }
 
 function toggleMenu() {
