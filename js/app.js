@@ -1,7 +1,7 @@
 // ── DATA & CONFIG ──
 const FIXED = 6400;
 const LATE  = 500;
-const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycby4GdBCYNCx7UC83rwiKk8TjkJ3AKI-VFBT7BlBLAJXcCHKi_jLJlMirh8tdofMxto/exec";
+const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzfP1aRTKl_iZh2Q2kGeVIYKN1-pu_5fOKURdCBVd1UnBUFPPy9A4oqf6zJDo08rPA-/exec";
 
 const students = [
   { id:'67402040001', name:'นางสาวขวัญเนตร ธนะบุตร',         prefix:'นางสาว',       photo:'images/67402040001.jpg' },
