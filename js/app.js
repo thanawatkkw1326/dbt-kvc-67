@@ -51,7 +51,14 @@ function formatDate(raw) {
 // ─────────────────────────────────────────
 async function loadPaymentsFromSheet() {
   try {
-    const res = await fetch(GOOGLE_SHEET_URL, { redirect: 'follow' });
+    // timeout 5 วิ — ถ้า Sheet ตอบช้า render grid ทันทีโดยไม่รอ
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 5000);
+    const res = await fetch(GOOGLE_SHEET_URL, {
+      redirect: 'follow',
+      signal: controller.signal,
+    });
+    clearTimeout(timer);
     if (!res.ok) throw new Error('Network response failed');
     const data = await res.json();
 
@@ -86,25 +93,55 @@ function renderGrid() {
   if (!grid) return;
   grid.innerHTML = '';
   let paidCount = 0;
+  const fragment = document.createDocumentFragment(); // batch DOM insert = เร็วขึ้น
 
   students.forEach(s => {
     const paid = !!payments[s.id];
     if (paid) paidCount++;
 
-    const card = document.createElement('div');
+    // สร้างทุก element ด้วย createElement — ไม่มี innerHTML ทำให้ไม่มี "> หลุดออกมา
+    const card   = document.createElement('div');
     card.className = 'student-card';
-    const avatarHTML = s.photo
-      ? '<img src="' + s.photo + '" onerror="imgError(this)">'
-      : SVG_PLACEHOLDER;
-    card.innerHTML =
-      '<div class="s-avatar">' + avatarHTML + '</div>' +
-      '<div class="s-name">' + s.name + '</div>' +
-      '<div class="s-badge ' + (paid ? 'paid' : 'unpaid') + '">' +
-        (paid ? '✓ ชำระแล้ว' : '· ยังไม่ชำระ') +
-      '</div>' +
-      '<button class="s-login-btn" onclick="openLogin(\'' + s.id + '\')">🔑 เข้าสู่ระบบ</button>';
-    grid.appendChild(card);
+
+    // avatar
+    const avatarDiv = document.createElement('div');
+    avatarDiv.className = 's-avatar';
+    if (s.photo) {
+      const img = document.createElement('img');
+      img.src     = s.photo;
+      img.alt     = s.name;
+      img.loading = 'lazy';          // โหลดช้า → หน้าแรกเร็วขึ้น
+      img.decoding = 'async';
+      img.onerror = function() { this.parentElement.innerHTML = SVG_PLACEHOLDER; };
+      avatarDiv.appendChild(img);
+    } else {
+      avatarDiv.innerHTML = SVG_PLACEHOLDER;
+    }
+
+    // name
+    const nameDiv = document.createElement('div');
+    nameDiv.className   = 's-name';
+    nameDiv.textContent = s.name;
+
+    // badge
+    const badge = document.createElement('div');
+    badge.className   = 's-badge ' + (paid ? 'paid' : 'unpaid');
+    badge.textContent = paid ? '✓ ชำระแล้ว' : '· ยังไม่ชำระ';
+
+    // button
+    const btn = document.createElement('button');
+    btn.className   = 's-login-btn';
+    btn.textContent = '🔑 เข้าสู่ระบบ';
+    btn.onclick     = () => openLogin(s.id);
+
+    card.appendChild(avatarDiv);
+    card.appendChild(nameDiv);
+    card.appendChild(badge);
+    card.appendChild(btn);
+    fragment.appendChild(card);
   });
+
+  grid.appendChild(fragment);
 
   const pCount = document.getElementById('paid-count');
   const uCount = document.getElementById('unpaid-count');
@@ -122,9 +159,18 @@ function openLogin(id) {
   const modalName = document.getElementById('modal-name');
   const inner     = document.getElementById('modal-avatar-inner');
   if (modalName) modalName.textContent = current.name;
-  if (inner) inner.innerHTML = current.photo
-    ? `<img src="${current.photo}" onerror="imgError(this)">`
-    : svgIcon();
+  if (inner) {
+    inner.innerHTML = '';
+    if (current.photo) {
+      const img = document.createElement('img');
+      img.src     = current.photo;
+      img.alt     = current.name;
+      img.onerror = function() { this.parentElement.innerHTML = SVG_PLACEHOLDER; };
+      inner.appendChild(img);
+    } else {
+      inner.innerHTML = SVG_PLACEHOLDER;
+    }
+  }
 
   const userInp = document.getElementById('login-user');
   const passInp = document.getElementById('login-pass');
@@ -185,9 +231,18 @@ function openForm(s) {
 
   // avatar
   const inner = document.getElementById('pf-avatar-inner');
-  if (inner) inner.innerHTML = s.photo
-    ? `<img src="${s.photo}" onerror="imgError(this)">`
-    : svgIcon();
+  if (inner) {
+    inner.innerHTML = '';
+    if (s.photo) {
+      const img = document.createElement('img');
+      img.src     = s.photo;
+      img.alt     = s.name;
+      img.onerror = function() { this.parentElement.innerHTML = SVG_PLACEHOLDER; };
+      inner.appendChild(img);
+    } else {
+      inner.innerHTML = SVG_PLACEHOLDER;
+    }
+  }
 
   // reset slip
   const slipBtn = document.querySelector('button[onclick*="slip-upload"]');
