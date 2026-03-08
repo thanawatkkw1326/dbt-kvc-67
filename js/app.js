@@ -249,38 +249,94 @@ function handleSlipUpload(e) {
   r.readAsDataURL(file);
 }
 
-const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzeOWPgCJ7ouMA6bswJzyrx-JYyyEqQTHMbC4-0CgN26JoHMqbax2KjcAc31O_sgfU5/exec";
-function submitPayment() {
+const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycby4GdBCYNCx7UC83rwiKk8TjkJ3AKI-VFBT7BlBLAJXcCHKi_jLJlMirh8tdofMxto/exec";
+async function submitPayment() {
   const s = current; if (!s) return;
   const date = document.getElementById('pf-date').value;
   if (!date) { toast('⚠️ กรุณาเลือกวันที่ชำระ', '#c05621'); return; }
 
-  // (เลือกใช้) ถ้าต้องการบังคับให้ต้องแนบสลิปก่อนส่ง
-  // if (!currentSlip) { toast('⚠️ กรุณาแนบหลักฐานการชำระเงิน', '#c05621'); return; }
+  // แสดง Toast แจ้งเตือนระหว่างรอ (เนื่องจากการส่งรูปใช้เวลา)
+  toast('⏳ กำลังอัปโหลดสลิปและบันทึกข้อมูล...', '#1e3a5f');
 
   const fn  = document.getElementById('pf-fullname').value;
   const pre = document.getElementById('pf-prefix').value;
   const yr  = document.getElementById('pf-year').value;
   const late = withLate ? LATE : 0;
-  const btnSlip = document.querySelector('button[onclick*="slip-upload"]');
-  if (btnSlip) {
-      btnSlip.innerHTML = `📁 แนบหลักฐาน`; // คืนค่าข้อความเดิม
-      btnSlip.style.color = '';            // คืนค่าสีเดิม
-  }
-  // ---------------------------------------
+  const total = FIXED + late;
 
-  payments[s.id] = {
-    fullname: fn, prefix: pre,
-    amt: FIXED, late, total: FIXED + late,
-    date, year: yr, lateFee: withLate,
-    slip: currentSlip // <--- เพิ่มการบันทึกรูปสลิปตรงนี้
+  // เตรียมข้อมูลสำหรับส่งไปยัง Google Apps Script
+  const payload = {
+    studentId: s.id,
+    prefix: pre,
+    fullname: fn,
+    year: yr,
+    date: date,
+    total: total,
+    lateFee: withLate,
+    slip: currentSlip // ส่งรูป Base64 ไป
   };
 
-  currentSlip = null; // ล้างค่าสลิปออกเพื่อเตรียมสำหรับคนต่อไป
-  renderGrid();
-  renderSummary();
-  toast('✅ บันทึกข้อมูลสำเร็จ!');
-  showPage('home');
+  try {
+    // ส่งข้อมูลไปยัง Google Apps Script
+    // ใช้ mode: 'no-cors' เพื่อหลีกเลี่ยงปัญหา CORS กับ Google Script
+    await fetch(GOOGLE_SHEET_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      cache: 'no-cache',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    // บันทึกข้อมูลลงในตัวแปรหน้าเว็บ (เพื่อให้ Summary แสดงผลทันที)
+    payments[s.id] = {
+      fullname: fn, prefix: pre,
+      amt: FIXED, late: late, total: total,
+      date: date, year: yr, lateFee: withLate
+    };
+
+    // คืนค่าปุ่มแนบหลักฐาน
+    const btnSlip = document.querySelector('button[onclick*="slip-upload"]');
+    if (btnSlip) {
+      btnSlip.innerHTML = `📁 แนบหลักฐาน`;
+      btnSlip.style.color = '';
+    }
+
+    currentSlip = null; // ล้างค่าสลิป
+    renderGrid();
+    renderSummary();
+    toast('✅ บันทึกข้อมูลและสลิปลง Google Drive เรียบร้อย!');
+    showPage('home');
+
+  } catch (error) {
+    console.error('Error:', error);
+    toast('❌ เกิดข้อผิดพลาดในการเชื่อมต่อ', '#c05621');
+  }
+}
+
+async function loadPaymentsFromSheet() {
+  try {
+    const response = await fetch(GOOGLE_SHEET_URL);
+    const data = await response.json();
+    
+    // แปลงข้อมูลจาก Sheet กลับเข้าตัวแปร payments
+    data.forEach(item => {
+      payments[item.studentId] = {
+        fullname: item.fullname,
+        prefix: "", 
+        amt: FIXED,
+        late: item.lateFee ? LATE : 0,
+        total: item.total,
+        date: item.date,
+        year: item.year,
+        lateFee: item.lateFee
+      };
+    });
+    
+    renderGrid();
+    renderSummary();
+  } catch (error) {
+    console.log("ยังไม่มีข้อมูลในระบบหรือเชื่อมต่อไม่ได้:", error);
+  }
 }
 
 // ── RENDER SUMMARY ──
@@ -321,6 +377,7 @@ function renderSummary() {
 // ── INIT ──
 loadLogo();
 // loadPhotos();
+loadPaymentsFromSheet(); // ✨ เปลี่ยนจากโหลดในเครื่องเป็นโหลดจาก Sheet แทน
 renderGrid();
 renderSummary();
 
