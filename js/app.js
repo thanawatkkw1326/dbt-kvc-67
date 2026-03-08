@@ -249,7 +249,7 @@ function handleSlipUpload(e) {
   r.readAsDataURL(file);
 }
 
-const GOOGLE_SHEET_URL = "https://script.google.com/macros/library/d/1H7XKtphduys96jTdSxmnjWHgvMttfXMpCUnEmpIXo3UdNC39q-KPCR0i/5";
+const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycby4GdBCYNCx7UC83rwiKk8TjkJ3AKI-VFBT7BlBLAJXcCHKi_jLJlMirh8tdofMxto/exec";
 async function submitPayment() {
   const s = current; if (!s) return;
   const date = document.getElementById('pf-date').value;
