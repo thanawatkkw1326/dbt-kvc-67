@@ -1,39 +1,37 @@
 // ── DATA & CONFIG ──
 const FIXED = 6400;
 const LATE  = 500;
-// ใส่ URL ของ Web App จาก Google Apps Script ที่ลงท้ายด้วย /exec
 const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycby4GdBCYNCx7UC83rwiKk8TjkJ3AKI-VFBT7BlBLAJXcCHKi_jLJlMirh8tdofMxto/exec";
 
 const students = [
   { id:'67402040001', name:'นางสาวขวัญเนตร ธนะบุตร', photo:'images/67402040001.jpg' },
   { id:'67402040002', name:'นางสาวจิราภรณ์ กงสะเด็น',  photo:'images/67402040002.jpg' },
   { id:'67402040003', name:'นายชนาธิป หารสุโพธิ์',  photo:'images/67402040003.jpg' },
-  { id:'67402040004', name:'นางสาวชลธิชา ศิลากุล',              prefix:'นางสาว',        photo:'images/67402040004.png' },
-  { id:'67402040005', name:'นายณัฐภูมิ เขียวสด',                 prefix:'นาย',           photo:'images/67402040005.jpg' },
-  { id:'67402040006', name:'นายธนาวัฒน์ คำกอง',                  prefix:'นาย',           photo:'images/67402040006.jpg' },
-  { id:'67402040008', name:'นายภูมิวิวัฒน์ มาตยคุณ',             prefix:'นาย',           photo:'images/67402040008.jpg' },
-  { id:'67402040009', name:'นางสาวมินตรา โคตะมะ',                prefix:'นางสาว',        photo:'images/67402040009.jpg' },
-  { id:'67402040011', name:'นางสาวสุนิสา สมณะ',                  prefix:'นางสาว',        photo:'images/67402040011.jpg' },
-  { id:'67402040012', name:'นางสาวอาทิตยา โยสิคุณ',              prefix:'นางสาว',        photo:'images/67402040012.jpg' },
-  { id:'67402040013', name:'นางสาวอินทราวารี สุนทอง',            prefix:'นางสาว',        photo:'images/67402040013.jpg' },
-  { id:'67402040014', name:'นางสาวกตวรรณ จุลโพธิ์',              prefix:'นางสาว',        photo:'images/67402040014.jpg' },
-  { id:'67402040015', name:'นางสาวภัทรสุดา หวานขม',              prefix:'นางสาว',        photo:'images/67402040015.jpg' },
-  { id:'67402040016', name:'นายอิสระ วัฒนาเสรีพล',               prefix:'นาย',           photo:'images/67402040016.jpg' },
-  { id:'67402040018', name:'นางสาวกุลสตรี กอจันกลาง',            prefix:'นางสาว',        photo:'images/67402040018.jpg' },
-  { id:'67402040019', name:'ว่าที่ร้อยตรีชาติณรงค์ น้อยมาลา',   prefix:'ว่าที่ร้อยตรี', photo:'images/67402040019.jpg' },
-  { id:'67402040021', name:'นางสาวศิริรัตน์ ชินนอก',             prefix:'นางสาว',        photo:'images/67402040021.jpg' },
+  { id:'67402040004', name:'นางสาวชลธิชา ศิลากุล', prefix:'นางสาว', photo:'images/67402040004.png' },
+  { id:'67402040005', name:'นายณัฐภูมิ เขียวสด', prefix:'นาย', photo:'images/67402040005.jpg' },
+  { id:'67402040006', name:'นายธนาวัฒน์ คำกอง', prefix:'นาย', photo:'images/67402040006.jpg' },
+  { id:'67402040008', name:'นายภูมิวิวัฒน์ มาตยคุณ', prefix:'นาย', photo:'images/67402040008.jpg' },
+  { id:'67402040009', name:'นางสาวมินตรา โคตะมะ', prefix:'นางสาว', photo:'images/67402040009.jpg' },
+  { id:'67402040011', name:'นางสาวสุนิสา สมณะ', prefix:'นางสาว', photo:'images/67402040011.jpg' },
+  { id:'67402040012', name:'นางสาวอาทิตยา โยสิคุณ', prefix:'นางสาว', photo:'images/67402040012.jpg' },
+  { id:'67402040013', name:'นางสาวอินทราวารี สุนทอง', prefix:'นางสาว', photo:'images/67402040013.jpg' },
+  { id:'67402040014', name:'นางสาวกตวรรณ จุลโพธิ์', prefix:'นางสาว', photo:'images/67402040014.jpg' },
+  { id:'67402040015', name:'นางสาวภัทรสุดา หวานขม', prefix:'นางสาว', photo:'images/67402040015.jpg' },
+  { id:'67402040016', name:'นายอิสระ วัฒนาเสรีพล', prefix:'นาย', photo:'images/67402040016.jpg' },
+  { id:'67402040018', name:'นางสาวกุลสตรี กอจันกลาง', prefix:'นางสาว', photo:'images/67402040018.jpg' },
+  { id:'67402040019', name:'ว่าที่ร้อยตรีชาติณรงค์ น้อยมาลา', prefix:'ว่าที่ร้อยตรี', photo:'images/67402040019.jpg' },
+  { id:'67402040021', name:'นางสาวศิริรัตน์ ชินนอก', prefix:'นางสาว', photo:'images/67402040021.jpg' },
 ];
 
-let payments = {}; // เก็บข้อมูลการชำระที่ดึงจาก Sheet
-let current  = null; // นักศึกษาที่กำลังดำเนินการ
+let payments = {}; 
+let current  = null; 
 let withLate = false;
 let currentSlip = null;
 
-// ── HELPERS ──
 const pw = id => 'DBT' + id.slice(-3);
 const svgIcon = () => `<svg viewBox="0 0 80 80" fill="#cbd5e0" xmlns="http://www.w3.org/2000/svg"><circle cx="40" cy="30" r="18"/><ellipse cx="40" cy="65" rx="28" ry="18"/></svg>`;
 
-// ── LOAD FROM SHEET (GET) ──
+// ── LOAD FROM SHEET ──
 async function loadPaymentsFromSheet() {
   try {
     const response = await fetch(GOOGLE_SHEET_URL, { redirect: 'follow' });
@@ -59,10 +57,11 @@ async function loadPaymentsFromSheet() {
     }
   } catch (error) {
     console.warn("ยังไม่มีข้อมูลชำระเงินในระบบ:", error);
+    renderGrid(); // เรียกเพื่อให้ Grid เริ่มต้นทำงาน
   }
 }
 
-// ── RENDER GRID (HOME) ──
+// ── RENDER GRID ──
 function renderGrid() {
   const grid = document.getElementById('student-grid');
   if(!grid) return;
@@ -74,10 +73,10 @@ function renderGrid() {
     if (paid) paidCount++;
     const card = document.createElement('div');
     card.className = 'student-card';
-    const av = s.photo ? `<img src="${s.photo}" alt="${s.name}">` : `<div class="s-avatar-icon">${svgIcon()}</div>`;
+    const av = s.photo ? `<img src="${s.photo}" alt="${s.name}" onerror="this.innerHTML='${svgIcon()}';">` : `<div class="s-avatar-icon">${svgIcon()}</div>`;
 
     card.innerHTML = `
-      <div class="s-avatar">${av}</div>
+      <div class="s-avatar">${s.photo ? `<img src="${s.photo}" onerror="this.parentElement.innerHTML='${svgIcon()}'">` : svgIcon()}</div>
       <div class="s-name">${s.name}</div>
       <div class="s-badge ${paid ? 'paid' : 'unpaid'}">${paid ? '✓ ชำระแล้ว' : '· ยังไม่ชำระ'}</div>
       <button class="s-login-btn" onclick="openLogin('${s.id}')">🔑 เข้าสู่ระบบ</button>
@@ -85,16 +84,18 @@ function renderGrid() {
     grid.appendChild(card);
   });
 
-  document.getElementById('paid-count').textContent = paidCount;
-  document.getElementById('unpaid-count').textContent = students.length - paidCount;
+  if(document.getElementById('paid-count')) document.getElementById('paid-count').textContent = paidCount;
+  if(document.getElementById('unpaid-count')) document.getElementById('unpaid-count').textContent = students.length - paidCount;
 }
 
-// ── LOGIN MODAL ──
+// ── LOGIN ──
 function openLogin(id) {
   current = students.find(x => x.id === id);
+  if(!current) return;
+
   document.getElementById('modal-name').textContent = current.name;
   const inner = document.getElementById('modal-avatar-inner');
-  inner.innerHTML = current.photo ? `<img src="${current.photo}">` : svgIcon();
+  inner.innerHTML = current.photo ? `<img src="${current.photo}" onerror="this.parentElement.innerHTML='${svgIcon()}'">` : svgIcon();
   
   document.getElementById('login-user').value = '';
   document.getElementById('login-pass').value = '';
@@ -109,6 +110,7 @@ function closeModal() {
 function doLogin() {
   const u = document.getElementById('login-user').value.trim();
   const p = document.getElementById('login-pass').value.trim();
+  
   if (u === current.id && p === pw(current.id)) {
     closeModal();
     openForm(current);
@@ -118,21 +120,25 @@ function doLogin() {
   }
 }
 
-// ── FORM PAGE (แก้ไขรหัสหายที่นี่) ──
+// ── FORM PAGE ──
 function openForm(s) {
-  // 1. เติมข้อมูลลงหน้าจอ
+  current = s; // Lock ผู้ใช้ปัจจุบัน
+  
+  // 1. เติมข้อมูลลง UI
   document.getElementById('pf-name').textContent = s.name;
   document.getElementById('pf-id').textContent = 'รหัสนักศึกษา ' + s.id;
   
-  // 2. เติมข้อมูลลง Input (สำคัญ: ตรงกับ ID pf-student-id ใน HTML ของคุณ)
-  document.getElementById('pf-student-id').value = s.id;
+  // 2. เติมลง Input (กันรหัสหาย)
+  const idInput = document.getElementById('pf-student-id');
+  if(idInput) idInput.value = s.id;
+  
   document.getElementById('pf-fullname').value = s.name;
   document.getElementById('pf-prefix').value = s.prefix || 'นาย';
   document.getElementById('pf-date').value = new Date().toISOString().split('T')[0];
   
-  // 3. จัดการรูปในหน้าฟอร์ม
+  // 3. รูปในฟอร์ม
   const inner = document.getElementById('pf-avatar-inner');
-  inner.innerHTML = s.photo ? `<img src="${s.photo}">` : svgIcon();
+  inner.innerHTML = s.photo ? `<img src="${s.photo}" onerror="this.parentElement.innerHTML='${svgIcon()}'">` : svgIcon();
 
   setLateFee(false);
   currentSlip = null;
@@ -149,11 +155,13 @@ function setLateFee(v) {
   document.getElementById('btn-late-no').className  = 'toggle-btn ' + (!v ? 'on' : 'off');
   
   const chip = document.getElementById('late-chip');
-  chip.style.display = v ? 'inline-block' : 'none';
+  if(chip) chip.style.display = v ? 'inline-block' : 'none';
 
   const total = FIXED + (v ? LATE : 0);
   document.getElementById('pf-total').textContent = total.toLocaleString();
-  document.getElementById('total-breakdown').textContent = `ค่าเทอม 6,400 บาท ${v ? '+ ค่าปรับ 500 บาท' : ''}`;
+  
+  const breakdown = document.getElementById('total-breakdown');
+  if(breakdown) breakdown.textContent = `ค่าเทอม 6,400 บาท ${v ? '+ ค่าปรับ 500 บาท' : ''}`;
 }
 
 // ── SLIP UPLOAD ──
@@ -162,7 +170,7 @@ function handleSlipUpload(e) {
   if (!file) return;
   const r = new FileReader();
   r.onload = ev => {
-    currentSlip = ev.target.result; // base64
+    currentSlip = ev.target.result;
     const btn = document.querySelector('button[onclick*="slip-upload"]');
     if (btn) { btn.innerHTML = `✅ แนบหลักฐานแล้ว`; btn.style.color = '#2f855a'; }
     toast('📎 แนบหลักฐานเรียบร้อย');
@@ -170,13 +178,13 @@ function handleSlipUpload(e) {
   r.readAsDataURL(file);
 }
 
-// ── SUBMIT (POST) ──
+// ── SUBMIT ──
 async function submitPayment() {
   if (!current) return;
   const date = document.getElementById('pf-date').value;
   if (!date) { toast('⚠️ กรุณาเลือกวันที่ชำระ', '#c05621'); return; }
 
-  toast('⏳ กำลังบันทึกข้อมูลและอัปโหลดสลิป...', '#1e3a5f');
+  toast('⏳ กำลังบันทึกข้อมูล...', '#1e3a5f');
 
   const payload = {
     studentId: current.id,
@@ -196,7 +204,7 @@ async function submitPayment() {
       body: JSON.stringify(payload)
     });
 
-    // จำลองสถานะชำระแล้วบนหน้าจอทันที
+    // อัปเดตข้อมูล Local ทันที
     payments[current.id] = {
       fullname: payload.fullname,
       year: payload.year,
@@ -246,27 +254,21 @@ function renderSummary() {
   });
 }
 
-// ── UI NAVIGATION (ฉบับแก้ไข Error Null) ──
+// ── UI NAVIGATION ──
 function showPage(name) {
-  // 1. ลบ class active ออกจากทุกหน้าและทุกปุ่มเมนูก่อน
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.sidebar-item').forEach(b => b.classList.remove('active'));
 
-  // 2. แสดงหน้าที่ต้องการ
   const targetPage = document.getElementById('page-' + name);
   if (targetPage) {
     targetPage.classList.add('active');
-  } else {
-    console.warn(`ไม่พบหน้า: page-${name}`);
   }
 
-  // 3. ทำให้ปุ่มเมนูสว่างขึ้น (เฉพาะถ้ามีปุ่มนั้นอยู่ใน Sidebar)
   const targetNav = document.getElementById('nav-' + name);
   if (targetNav) {
     targetNav.classList.add('active');
   }
 
-  // 4. ปิดเมนูบนมือถืออัตโนมัติ
   if (window.innerWidth < 768) {
     const sidebar = document.querySelector('.sidebar');
     if (sidebar && sidebar.classList.contains('active')) {
@@ -276,11 +278,13 @@ function showPage(name) {
 }
 
 function toggleMenu() {
-  document.querySelector('.sidebar').classList.toggle('active');
+  const sidebar = document.querySelector('.sidebar');
+  if(sidebar) sidebar.classList.toggle('active');
 }
 
 function toast(msg, color) {
   const t = document.getElementById('toast');
+  if(!t) return;
   document.getElementById('toast-msg').textContent = msg;
   document.getElementById('toast-dot').style.background = color || '#2f855a';
   t.classList.add('show');
@@ -288,6 +292,6 @@ function toast(msg, color) {
 }
 
 // ── INITIALIZE ──
-window.onload = () => {
+window.addEventListener('DOMContentLoaded', () => {
   loadPaymentsFromSheet();
-};
+});
