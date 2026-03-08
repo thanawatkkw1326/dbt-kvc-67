@@ -68,7 +68,7 @@ async function loadPaymentsFromSheet() {
         if (item.studentId) {
           payments[item.studentId] = {
             fullname : item.fullname  || '',
-            year     : item.year      || '',
+            year     : '2/2568',
             date     : item.date ? String(item.date).split('T')[0] : '',
             lateFee  : item.lateFee === true || item.lateFee === 'true',
             total    : Number(item.total) || FIXED,
@@ -312,7 +312,13 @@ function handleLogoUpload(e) {
   const r = new FileReader();
   r.onload = ev => {
     const btn = document.getElementById('logo-btn');
-    if (btn) btn.style.backgroundImage = `url('${ev.target.result}')`;
+    if (!btn) return;
+    // ล้าง border dashed แล้วแสดงรูปแทน
+    btn.style.border = 'none';
+    btn.style.background = 'transparent';
+    btn.style.padding = '0';
+    // ใส่รูปเข้าไปใน button โดยตรง
+    btn.innerHTML = '<img src="' + ev.target.result + '" style="width:100%;height:100%;object-fit:contain;border-radius:10px;display:block;">';
   };
   r.readAsDataURL(file);
 }
@@ -392,7 +398,7 @@ function renderSummary() {
       tr.innerHTML =
         '<td>' + (p.fullname || s.name) + '</td>' +
         '<td>' + s.id + '</td>' +
-        '<td>' + (p.year || '—') + '</td>' +
+        '<td>2/2568</td>' +
         '<td>' + Number(p.amt).toLocaleString() + '</td>' +
         '<td>' + (p.lateFee ? '500' : '0') + '</td>' +
         '<td>' + Number(p.total).toLocaleString() + '</td>' +
