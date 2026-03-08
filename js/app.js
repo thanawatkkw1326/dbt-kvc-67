@@ -388,6 +388,8 @@ async function submitPayment() {
     renderSummary();
     toast('✅ บันทึกข้อมูลสำเร็จ!');
     showPage('home');
+    // sync กลับจาก Sheet ทันทีหลัง submit
+    setTimeout(pollSheet, 1500);
 
   } catch (err) {
     console.error('submitPayment error:', err);
@@ -466,14 +468,59 @@ function toast(msg, color) {
 }
 
 // ─────────────────────────────────────────
+// REALTIME POLL
+// ─────────────────────────────────────────
+let lastHash = '';
+
+async function pollSheet() {
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 5000);
+    const res  = await fetch(GOOGLE_SHEET_URL + '?t=' + Date.now(), {
+      redirect: 'follow',
+      signal: controller.signal,
+    });
+    clearTimeout(timer);
+    if (!res.ok) return;
+    const data = await res.json();
+    if (!Array.isArray(data)) return;
+
+    // เปรียบเทียบ hash — re-render เฉพาะเมื่อข้อมูลเปลี่ยน
+    const hash = JSON.stringify(data);
+    if (hash === lastHash) return;
+    lastHash = hash;
+
+    payments = {};
+    data.forEach(item => {
+      if (item.studentId) {
+        payments[item.studentId] = {
+          fullname : item.fullname || '',
+          year     : '2/2568',
+          date     : item.date ? String(item.date).split('T')[0] : '',
+          lateFee  : item.lateFee === true || item.lateFee === 'true',
+          total    : Number(item.total) || FIXED,
+          amt      : FIXED,
+        };
+      }
+    });
+
+    renderGrid();
+    renderSummary();
+  } catch (_) {}
+}
+
+// ─────────────────────────────────────────
 // INIT
 // ─────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
-  // 1. โลโก้ + grid ขึ้นทันที ไม่รอ network
+  // 1. render ทันทีไม่รอ network
   loadLogo();
   renderGrid();
   renderSummary();
 
-  // 2. fetch Sheet ใน background แล้ว re-render เมื่อได้ข้อมูล
-  loadPaymentsFromSheet();
+  // 2. โหลดครั้งแรก
+  pollSheet();
+
+  // 3. poll ทุก 15 วิ — realtime
+  setInterval(pollSheet, 15000);
 });
