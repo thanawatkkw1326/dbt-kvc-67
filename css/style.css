@@ -179,9 +179,9 @@ body {
   font-size: 11px; font-weight: 600;
   padding: 3px 12px; border-radius: 20px;
 }
-.s-badge.paid       { background: var(--green-lt);  color: var(--green); }
-.s-badge.unpaid     { background: var(--navy-lt);   color: var(--navy-md); }
-.s-badge.unpaid-red { background: #fff5f5; color: #c53030; border: 1px solid #fed7d7; }
+.s-badge.paid       { background: #f0fff4 !important; color: #276749 !important; }
+.s-badge.unpaid     { background: #eef2f7 !important; color: #2d5282 !important; }
+.s-badge.unpaid-red { background: #fff5f5 !important; color: #c53030 !important; border: 1px solid #fed7d7 !important; }
 
 .s-login-btn {
   width: 100%; padding: 7px;
