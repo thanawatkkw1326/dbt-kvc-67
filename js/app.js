@@ -57,7 +57,7 @@ async function loadPaymentsFromSheet() {
     }
   } catch (error) {
     console.warn("ยังไม่มีข้อมูลชำระเงินในระบบ:", error);
-    renderGrid(); // เรียกเพื่อให้ Grid เริ่มต้นทำงาน
+    renderGrid(); 
   }
 }
 
@@ -73,8 +73,6 @@ function renderGrid() {
     if (paid) paidCount++;
     const card = document.createElement('div');
     card.className = 'student-card';
-    const av = s.photo ? `<img src="${s.photo}" alt="${s.name}" onerror="this.innerHTML='${svgIcon()}';">` : `<div class="s-avatar-icon">${svgIcon()}</div>`;
-
     card.innerHTML = `
       <div class="s-avatar">${s.photo ? `<img src="${s.photo}" onerror="this.parentElement.innerHTML='${svgIcon()}'">` : svgIcon()}</div>
       <div class="s-name">${s.name}</div>
@@ -84,8 +82,10 @@ function renderGrid() {
     grid.appendChild(card);
   });
 
-  if(document.getElementById('paid-count')) document.getElementById('paid-count').textContent = paidCount;
-  if(document.getElementById('unpaid-count')) document.getElementById('unpaid-count').textContent = students.length - paidCount;
+  const pCount = document.getElementById('paid-count');
+  const uCount = document.getElementById('unpaid-count');
+  if(pCount) pCount.textContent = paidCount;
+  if(uCount) uCount.textContent = students.length - paidCount;
 }
 
 // ── LOGIN ──
@@ -93,52 +93,64 @@ function openLogin(id) {
   current = students.find(x => x.id === id);
   if(!current) return;
 
-  document.getElementById('modal-name').textContent = current.name;
+  const modalName = document.getElementById('modal-name');
   const inner = document.getElementById('modal-avatar-inner');
-  inner.innerHTML = current.photo ? `<img src="${current.photo}" onerror="this.parentElement.innerHTML='${svgIcon()}'">` : svgIcon();
+  if(modalName) modalName.textContent = current.name;
+  if(inner) inner.innerHTML = current.photo ? `<img src="${current.photo}" onerror="this.parentElement.innerHTML='${svgIcon()}'">` : svgIcon();
   
-  document.getElementById('login-user').value = '';
-  document.getElementById('login-pass').value = '';
-  document.getElementById('login-modal').classList.add('open');
-  document.getElementById('login-error').style.display = 'none';
+  const userInp = document.getElementById('login-user');
+  const passInp = document.getElementById('login-pass');
+  const modal = document.getElementById('login-modal');
+  const err = document.getElementById('login-error');
+
+  if(userInp) userInp.value = '';
+  if(passInp) passInp.value = '';
+  if(modal) modal.classList.add('open');
+  if(err) err.style.display = 'none';
 }
 
 function closeModal() {
-  document.getElementById('login-modal').classList.remove('open');
+  const modal = document.getElementById('login-modal');
+  if(modal) modal.classList.remove('open');
 }
 
 function doLogin() {
-  const u = document.getElementById('login-user').value.trim();
-  const p = document.getElementById('login-pass').value.trim();
+  const uInp = document.getElementById('login-user');
+  const pInp = document.getElementById('login-pass');
+  if(!uInp || !pInp) return;
+
+  const u = uInp.value.trim();
+  const p = pInp.value.trim();
   
   if (u === current.id && p === pw(current.id)) {
     closeModal();
     openForm(current);
   } else {
-    document.getElementById('login-error').style.display = 'block';
+    const err = document.getElementById('login-error');
+    if(err) err.style.display = 'block';
     toast('❌ รหัสผ่านไม่ถูกต้อง', '#c05621');
   }
 }
 
 // ── FORM PAGE ──
 function openForm(s) {
-  current = s; // Lock ผู้ใช้ปัจจุบัน
+  current = s; 
   
-  // 1. เติมข้อมูลลง UI
-  document.getElementById('pf-name').textContent = s.name;
-  document.getElementById('pf-id').textContent = 'รหัสนักศึกษา ' + s.id;
-  
-  // 2. เติมลง Input (กันรหัสหาย)
+  const pfName = document.getElementById('pf-name');
+  const pfId = document.getElementById('pf-id');
   const idInput = document.getElementById('pf-student-id');
-  if(idInput) idInput.value = s.id;
-  
-  document.getElementById('pf-fullname').value = s.name;
-  document.getElementById('pf-prefix').value = s.prefix || 'นาย';
-  document.getElementById('pf-date').value = new Date().toISOString().split('T')[0];
-  
-  // 3. รูปในฟอร์ม
+  const fullInput = document.getElementById('pf-fullname');
+  const preInput = document.getElementById('pf-prefix');
+  const dateInput = document.getElementById('pf-date');
   const inner = document.getElementById('pf-avatar-inner');
-  inner.innerHTML = s.photo ? `<img src="${s.photo}" onerror="this.parentElement.innerHTML='${svgIcon()}'">` : svgIcon();
+
+  if(pfName) pfName.textContent = s.name;
+  if(pfId) pfId.textContent = 'รหัสนักศึกษา ' + s.id;
+  if(idInput) idInput.value = s.id; // จุดที่รหัสหาย
+  if(fullInput) fullInput.value = s.name;
+  if(preInput) preInput.value = s.prefix || 'นาย';
+  if(dateInput) dateInput.value = new Date().toISOString().split('T')[0];
+  if(inner) inner.innerHTML = s.photo ? `<img src="${s.photo}" onerror="this.parentElement.innerHTML='${svgIcon()}'">` : svgIcon();
 
   setLateFee(false);
   currentSlip = null;
@@ -151,16 +163,18 @@ function openForm(s) {
 
 function setLateFee(v) {
   withLate = v;
-  document.getElementById('btn-late-yes').className = 'toggle-btn ' + (v ? 'on' : 'off');
-  document.getElementById('btn-late-no').className  = 'toggle-btn ' + (!v ? 'on' : 'off');
-  
+  const btnYes = document.getElementById('btn-late-yes');
+  const btnNo = document.getElementById('btn-late-no');
   const chip = document.getElementById('late-chip');
+  const totalDisplay = document.getElementById('pf-total');
+  const breakdown = document.getElementById('total-breakdown');
+
+  if(btnYes) btnYes.className = 'toggle-btn ' + (v ? 'on' : 'off');
+  if(btnNo) btnNo.className  = 'toggle-btn ' + (!v ? 'on' : 'off');
   if(chip) chip.style.display = v ? 'inline-block' : 'none';
 
   const total = FIXED + (v ? LATE : 0);
-  document.getElementById('pf-total').textContent = total.toLocaleString();
-  
-  const breakdown = document.getElementById('total-breakdown');
+  if(totalDisplay) totalDisplay.textContent = total.toLocaleString();
   if(breakdown) breakdown.textContent = `ค่าเทอม 6,400 บาท ${v ? '+ ค่าปรับ 500 บาท' : ''}`;
 }
 
@@ -181,8 +195,8 @@ function handleSlipUpload(e) {
 // ── SUBMIT ──
 async function submitPayment() {
   if (!current) return;
-  const date = document.getElementById('pf-date').value;
-  if (!date) { toast('⚠️ กรุณาเลือกวันที่ชำระ', '#c05621'); return; }
+  const dateInp = document.getElementById('pf-date');
+  if (!dateInp || !dateInp.value) { toast('⚠️ กรุณาเลือกวันที่ชำระ', '#c05621'); return; }
 
   toast('⏳ กำลังบันทึกข้อมูล...', '#1e3a5f');
 
@@ -191,36 +205,20 @@ async function submitPayment() {
     prefix: document.getElementById('pf-prefix').value,
     fullname: document.getElementById('pf-fullname').value,
     year: document.getElementById('pf-year').value,
-    date: date,
+    date: dateInp.value,
     total: FIXED + (withLate ? LATE : 0),
     lateFee: withLate,
     slip: currentSlip
   };
 
   try {
-    await fetch(GOOGLE_SHEET_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      body: JSON.stringify(payload)
-    });
-
-    // อัปเดตข้อมูล Local ทันที
-    payments[current.id] = {
-      fullname: payload.fullname,
-      year: payload.year,
-      date: payload.date,
-      lateFee: payload.lateFee,
-      total: payload.total,
-      amt: FIXED
-    };
-
+    await fetch(GOOGLE_SHEET_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+    payments[current.id] = { ...payload, amt: FIXED };
     renderGrid();
     renderSummary();
     toast('✅ บันทึกข้อมูลสำเร็จ!');
     showPage('home');
-  } catch (error) {
-    toast('❌ เกิดข้อผิดพลาด', '#c05621');
-  }
+  } catch (error) { toast('❌ เกิดข้อผิดพลาด', '#c05621'); }
 }
 
 // ── SUMMARY TABLE ──
@@ -233,47 +231,38 @@ function renderSummary() {
     const p = payments[s.id];
     const tr = document.createElement('tr');
     if (p) {
-      tr.innerHTML = `
-        <td style="text-align:left; font-weight:700;">${p.fullname}</td>
-        <td>${s.id}</td>
-        <td>${p.year}</td>
-        <td>${p.amt.toLocaleString()}</td>
-        <td>${p.lateFee ? '500' : '0'}</td>
-        <td style="font-weight:bold; color:var(--navy)">${p.total.toLocaleString()}</td>
-        <td><span class="tag-paid">✓ ชำระแล้ว</span></td>
-      `;
+      tr.innerHTML = `<td>${p.fullname}</td><td>${s.id}</td><td>${p.year}</td><td>${p.amt.toLocaleString()}</td><td>${p.lateFee ? '500' : '0'}</td><td>${p.total.toLocaleString()}</td><td><span class="tag-paid">✓ ชำระแล้ว</span></td>`;
     } else {
-      tr.innerHTML = `
-        <td style="text-align:left; color:var(--ink-mid)">${s.name}</td>
-        <td style="color:var(--ink-mid)">${s.id}</td>
-        <td>—</td><td>—</td><td>—</td><td>—</td>
-        <td><span class="tag-unpaid">รอชำระ</span></td>
-      `;
+      tr.innerHTML = `<td>${s.name}</td><td>${s.id}</td><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="tag-unpaid">รอชำระ</span></td>`;
     }
     tb.appendChild(tr);
   });
 }
 
-// ── UI NAVIGATION ──
+// ── UI NAVIGATION (แก้จุดที่ทำให้หน้าไม่เปลี่ยน) ──
 function showPage(name) {
+  // ลบ active ออกจากทุกหน้า
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.sidebar-item').forEach(b => b.classList.remove('active'));
 
+  // เปิดหน้าเป้าหมาย
   const targetPage = document.getElementById('page-' + name);
   if (targetPage) {
     targetPage.classList.add('active');
+  } else {
+    console.warn(`หน้า id="page-${name}" ไม่มีอยู่ใน HTML`);
   }
 
+  // ปรับสถานะปุ่มเมนู (ถ้ามี)
   const targetNav = document.getElementById('nav-' + name);
   if (targetNav) {
     targetNav.classList.add('active');
   }
 
-  if (window.innerWidth < 768) {
-    const sidebar = document.querySelector('.sidebar');
-    if (sidebar && sidebar.classList.contains('active')) {
-      toggleMenu();
-    }
+  // ปรับหน้าจอมือถือ
+  const sidebar = document.querySelector('.sidebar');
+  if (window.innerWidth < 768 && sidebar && sidebar.classList.contains('active')) {
+    toggleMenu();
   }
 }
 
@@ -284,14 +273,14 @@ function toggleMenu() {
 
 function toast(msg, color) {
   const t = document.getElementById('toast');
-  if(!t) return;
-  document.getElementById('toast-msg').textContent = msg;
-  document.getElementById('toast-dot').style.background = color || '#2f855a';
+  const tMsg = document.getElementById('toast-msg');
+  const tDot = document.getElementById('toast-dot');
+  if(!t || !tMsg || !tDot) return;
+  tMsg.textContent = msg;
+  tDot.style.background = color || '#2f855a';
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3000);
 }
 
 // ── INITIALIZE ──
-window.addEventListener('DOMContentLoaded', () => {
-  loadPaymentsFromSheet();
-});
+window.addEventListener('DOMContentLoaded', loadPaymentsFromSheet);
