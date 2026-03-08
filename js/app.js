@@ -65,7 +65,7 @@ async function loadPaymentsFromSheet() {
   try {
     // timeout 5 วิ — ถ้า Sheet ตอบช้า render grid ทันทีโดยไม่รอ
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 5000);
+    const timer = setTimeout(() => controller.abort(), 3000);
     const res = await fetch(GOOGLE_SHEET_URL, {
       redirect: 'follow',
       signal: controller.signal,
@@ -469,6 +469,11 @@ function toast(msg, color) {
 // INIT
 // ─────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
+  // 1. โลโก้ + grid ขึ้นทันที ไม่รอ network
   loadLogo();
+  renderGrid();
+  renderSummary();
+
+  // 2. fetch Sheet ใน background แล้ว re-render เมื่อได้ข้อมูล
   loadPaymentsFromSheet();
 });
